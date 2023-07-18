@@ -3,7 +3,7 @@ import logging
 from typing import List
 from fastapi import APIRouter, Path
 from database import users, database
-from models import User, UserIn, UserOut
+from models import UserIn, UserOut
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 user_router = APIRouter()
 
 
-@user_router.post('/users/', response_model=User, summary='Add new user')
+@user_router.post('/users/', response_model=UserOut, summary='Add new user')
 async def create_user(user: UserIn):
-    query = users.insert().values(firstame=user.firstname,
+    query = users.insert().values(firstname=user.firstname,
                                   lastname=user.lastname,
                                   email=user.email,
                                   password=hashlib.md5(user.password.encode('utf-8')).hexdigest())

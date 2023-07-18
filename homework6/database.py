@@ -1,5 +1,5 @@
 from databases import Database
-from sqlalchemy import MetaData, create_engine, Table, Column, Integer, String, Text, Float, Date, Boolean
+from sqlalchemy import MetaData, create_engine, Table, Column, Integer, String, Text, Float, Date, Boolean, ForeignKey
 from homework6.settings import settings
 
 database = Database(settings.DATABASE_URL)
@@ -18,16 +18,16 @@ users = Table('users', metadata,
 products = Table('products', metadata,
                  Column('id', Integer, primary_key=True),
                  Column('title', String(settings.NAME_MAX_LENGTH)),
-                 Column('description', Text(settings.NAME_MAX_LENGTH)),
-                 Column('price', Float(settings.EMAIL_MAX_LENGTH)),
+                 Column('description', Text(300)),
+                 Column('price', Float()),
                  )
 
 orders = Table('orders', metadata,
                Column('id', Integer, primary_key=True),
-               Column('user_id', Integer, foreign_key=True),
-               Column('product_id', Integer, foreign_key=True),
+               Column('user_id', Integer, ForeignKey(users.c.id)),
+               Column('product_id', Integer, ForeignKey(products.c.id)),
                Column('order_date', Date()),
-               Column('delivered', Boolean()),
+               Column('delivered', Boolean(), default=False),
                )
 
 metadata.create_all(engine)

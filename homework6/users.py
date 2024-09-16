@@ -3,7 +3,7 @@ import logging
 from typing import List
 from fastapi import APIRouter, Path
 from database import users, database
-from models import User, UserIn, UserOut
+from models import UserIn, UserOut
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 user_router = APIRouter()
 
 
-@user_router.post('/users/', response_model=User, summary='Add new user')
+@user_router.post('/users/', response_model=UserOut, summary='Add new user')
 async def create_user(user: UserIn):
-    query = users.insert().values(firstame=user.firstname,
+    query = users.insert().values(firstname=user.firstname,
                                   lastname=user.lastname,
                                   email=user.email,
                                   password=hashlib.md5(user.password.encode('utf-8')).hexdigest())
@@ -22,6 +22,24 @@ async def create_user(user: UserIn):
     user.password = hashlib.md5(user.password.encode('utf-8')).hexdigest()
     return {**user.model_dump(), 'id': last_record_id}
 
+"""
+@router.get("/users", response_model=list[User], tags=["Users"])
+async def get_users():
+query = users.select()
+result = await database.fetch_all(query)
+users_with_orders = []
+for row in result:
+user = User.model_validate(dict(row))
+orders_items = await database.fetch_all(orders.select().where(orders.c.user_id == user.id))
+user.orders = [Order.model_validate(dict(ord)) for ord in orders_items]
+users_with_orders.append(user)
+
+return users_with_orders
+    ```
+    С join тоже можно, но неудобно выводить потом во вложенную структуру:
+    ```
+    query = select(orders, users).join(users)
+"""
 
 @user_router.get('/users/', response_model=List[UserOut],  summary='Read users list')
 async def read_users():
